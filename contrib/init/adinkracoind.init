@@ -1,0 +1,67 @@
+#!/usr/bin/env bash
+#
+#  adinkracoind The adinkracoin core server.
+#
+#
+# chkconfig: 345 80 20
+# description: adinkracoind
+# processname: adinkracoind
+#
+
+# Source function library.
+. /etc/init.d/functions
+
+# you can override defaults in /etc/sysconfig/adinkracoind, see below
+if [ -f /etc/sysconfig/adinkracoind ]; then
+        . /etc/sysconfig/adinkracoind
+fi
+
+RETVAL=0
+
+prog=adinkracoind
+# you can override the lockfile via ADINKRACOIND_LOCKFILE in /etc/sysconfig/adinkracoind
+lockfile=${ADINKRACOIND_LOCKFILE-/var/lock/subsys/adinkracoind}
+
+# adinkracoind defaults to /usr/bin/adinkracoind, override with ADINKRACOIND_BIN
+adinkracoind=${ADINKRACOIND_BIN-/usr/bin/adinkracoind}
+
+# adinkracoind opts default to -disablewallet, override with ADINKRACOIND_OPTS
+adinkracoind_opts=${ADINKRACOIND_OPTS--disablewallet}
+
+start() {
+    echo -n $"Starting $prog: "
+    daemon $DAEMONOPTS $adinkracoind $adinkracoind_opts
+    RETVAL=$?
+    echo
+    [ $RETVAL -eq 0 ] && touch $lockfile
+    return $RETVAL
+}
+
+stop() {
+    echo -n $"Stopping $prog: "
+    killproc $prog -t600
+    RETVAL=$?
+    echo
+    [ $RETVAL -eq 0 ] && rm -f $lockfile
+    return $RETVAL
+}
+
+case "$1" in
+    start)
+        start
+        ;;
+    stop)
+        stop
+        ;;
+    status)
+        status $prog
+        ;;
+    restart)
+        stop
+        start
+        ;;
+    *)
+        echo "Usage: service $prog {start|stop|status|restart}"
+        exit 1
+        ;;
+esac

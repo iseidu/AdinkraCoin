@@ -1,0 +1,33 @@
+# /etc/conf.d/adinkracoind: config file for /etc/init.d/adinkracoind
+
+# Config file location
+#ADINKRACOIND_CONFIGFILE="/etc/adinkracoin/adinkracoin.conf"
+
+# What directory to write pidfile to?  (created and owned by $ADINKRACOIND_USER)
+#ADINKRACOIND_PIDDIR="/var/run/adinkracoind"
+
+# What filename to give the pidfile
+#ADINKRACOIND_PIDFILE="${ADINKRACOIND_PIDDIR}/adinkracoind.pid"
+
+# Where to write adinkracoind data (be mindful that the blockchain is large)
+#ADINKRACOIND_DATADIR="/var/lib/adinkracoind"
+
+# User and group to own adinkracoind process
+#ADINKRACOIND_USER="adinkracoin"
+#ADINKRACOIND_GROUP="adinkracoin"
+
+# Path to adinkracoind executable
+#ADINKRACOIND_BIN="/usr/bin/adinkracoind"
+
+# Nice value to run adinkracoind under
+#ADINKRACOIND_NICE=0
+
+# Additional options (avoid -conf and -datadir, use flags above)
+#ADINKRACOIND_OPTS=""
+
+# The timeout in seconds OpenRC will wait for adinkracoind to terminate
+# after a SIGTERM has been raised.
+# Note that this will be mapped as argument to start-stop-daemon's
+# '--retry' option, which means you can specify a retry schedule
+# here. For more information see man 8 start-stop-daemon.
+ADINKRACOIND_SIGTERM_TIMEOUT=600

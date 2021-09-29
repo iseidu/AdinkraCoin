@@ -6,8 +6,8 @@ define(_CLIENT_VERSION_RC, 0)
 define(_CLIENT_VERSION_IS_RELEASE, false)
 define(_COPYRIGHT_YEAR, 2021)
 define(_COPYRIGHT_HOLDERS,[The %s developers])
-define(_COPYRIGHT_HOLDERS_SUBSTITUTION,[[Bitcoin Core]])
-AC_INIT([Bitcoin Core],m4_join([.], _CLIENT_VERSION_MAJOR, _CLIENT_VERSION_MINOR, _CLIENT_VERSION_BUILD)m4_if(_CLIENT_VERSION_RC, [0], [], [rc]_CLIENT_VERSION_RC),[https://github.com/adinkracoin/adinkracoin/issues],[adinkracoin],[https://adinkracoincore.org/])
+define(_COPYRIGHT_HOLDERS_SUBSTITUTION,[[Adinkracoin Core]])
+AC_INIT([Adinkracoin Core],m4_join([.], _CLIENT_VERSION_MAJOR, _CLIENT_VERSION_MINOR, _CLIENT_VERSION_BUILD)m4_if(_CLIENT_VERSION_RC, [0], [], [rc]_CLIENT_VERSION_RC),[https://github.com/adinkracoin/adinkracoin/issues],[adinkracoin],[https://adinkracoincore.org/])
 AC_CONFIG_SRCDIR([src/validation.cpp])
 AC_CONFIG_HEADERS([src/config/adinkracoin-config.h])
 AC_CONFIG_AUX_DIR([build-aux])
@@ -19,15 +19,15 @@ if test "x$PKG_CONFIG" = x; then
   AC_MSG_ERROR([pkg-config not found])
 fi
 
-BITCOIN_DAEMON_NAME=adinkracoind
-BITCOIN_GUI_NAME=adinkracoin-qt
-BITCOIN_CLI_NAME=adinkracoin-cli
-BITCOIN_TX_NAME=adinkracoin-tx
-BITCOIN_UTIL_NAME=adinkracoin-util
-BITCOIN_WALLET_TOOL_NAME=adinkracoin-wallet
+ADINKRACOIN_DAEMON_NAME=adinkracoind
+ADINKRACOIN_GUI_NAME=adinkracoin-qt
+ADINKRACOIN_CLI_NAME=adinkracoin-cli
+ADINKRACOIN_TX_NAME=adinkracoin-tx
+ADINKRACOIN_UTIL_NAME=adinkracoin-util
+ADINKRACOIN_WALLET_TOOL_NAME=adinkracoin-wallet
 dnl Multi Process
-BITCOIN_MP_NODE_NAME=adinkracoin-node
-BITCOIN_MP_GUI_NAME=adinkracoin-gui
+ADINKRACOIN_MP_NODE_NAME=adinkracoin-node
+ADINKRACOIN_MP_GUI_NAME=adinkracoin-gui
 
 dnl Unless the user specified ARFLAGS, force it to be cr
 AC_ARG_VAR(ARFLAGS, [Flags for the archiver, defaults to <cr> if not set])
@@ -37,9 +37,9 @@ fi
 
 AC_CANONICAL_HOST
 
-AH_TOP([#ifndef BITCOIN_CONFIG_H])
-AH_TOP([#define BITCOIN_CONFIG_H])
-AH_BOTTOM([#endif //BITCOIN_CONFIG_H])
+AH_TOP([#ifndef ADINKRACOIN_CONFIG_H])
+AH_TOP([#define ADINKRACOIN_CONFIG_H])
+AH_BOTTOM([#endif //ADINKRACOIN_CONFIG_H])
 
 dnl faketime breaks configure and is only needed for make. Disable it here.
 unset FAKETIME
@@ -220,7 +220,7 @@ AC_ARG_ENABLE([ccache],
 
 dnl Suppress warnings from external headers (e.g. Boost, Qt).
 dnl May be useful if warnings from external headers clutter the build output
-dnl too much, so that it becomes difficult to spot Bitcoin Core warnings
+dnl too much, so that it becomes difficult to spot Adinkracoin Core warnings
 dnl or if they cause a build failure with --enable-werror.
 AC_ARG_ENABLE([suppress-external-warnings],
   [AS_HELP_STRING([--enable-suppress-external-warnings],
@@ -687,7 +687,7 @@ case $host in
 
          if test "x$use_bdb" != xno && $BREW list --versions berkeley-db4 >/dev/null && test "x$BDB_CFLAGS" = "x" && test "x$BDB_LIBS" = "x"; then
            bdb_prefix=$($BREW --prefix berkeley-db4 2>/dev/null)
-           dnl This must precede the call to BITCOIN_FIND_BDB48 below.
+           dnl This must precede the call to ADINKRACOIN_FIND_BDB48 below.
            BDB_CFLAGS="-I$bdb_prefix/include"
            BDB_LIBS="-L$bdb_prefix/lib -ldb_cxx-4.8"
          fi
@@ -1313,10 +1313,10 @@ if test "x$enable_fuzz" = "xyes"; then
       */ int not_main() {
      ]])])
 else
-  BITCOIN_QT_INIT
+  ADINKRACOIN_QT_INIT
 
   dnl sets $adinkracoin_enable_qt, $adinkracoin_enable_qt_test, $adinkracoin_enable_qt_dbus
-  BITCOIN_QT_CONFIGURE([5.9.5])
+  ADINKRACOIN_QT_CONFIGURE([5.9.5])
 
   dnl Keep a copy of the original $QT_INCLUDES and use it when invoking qt's moc
   QT_INCLUDES_UNSUPPRESSED=$QT_INCLUDES
@@ -1332,7 +1332,7 @@ fi
 if test x$enable_wallet != xno; then
     dnl Check for libdb_cxx only if wallet enabled
     if test "x$use_bdb" != "xno"; then
-      BITCOIN_FIND_BDB48
+      ADINKRACOIN_FIND_BDB48
       if test x$suppress_external_warnings != xno ; then
         BDB_CPPFLAGS=SUPPRESS_WARNINGS($BDB_CPPFLAGS)
       fi
@@ -1497,7 +1497,7 @@ fi
 dnl QR Code encoding library check
 
 if test "x$use_qr" != xno; then
-  BITCOIN_QT_CHECK([PKG_CHECK_MODULES([QR], [libqrencode], [have_qrencode=yes], [have_qrencode=no])])
+  ADINKRACOIN_QT_CHECK([PKG_CHECK_MODULES([QR], [libqrencode], [have_qrencode=yes], [have_qrencode=no])])
 fi
 
 dnl ZMQ check
@@ -1577,8 +1577,8 @@ else
 fi
 
 AM_CONDITIONAL([BUILD_MULTIPROCESS],[test "x$build_multiprocess" = xyes])
-AM_CONDITIONAL([BUILD_BITCOIN_NODE], [test "x$build_multiprocess" = xyes])
-AM_CONDITIONAL([BUILD_BITCOIN_GUI], [test "x$build_multiprocess" = xyes])
+AM_CONDITIONAL([BUILD_ADINKRACOIN_NODE], [test "x$build_multiprocess" = xyes])
+AM_CONDITIONAL([BUILD_ADINKRACOIN_GUI], [test "x$build_multiprocess" = xyes])
 
 dnl codegen tools check
 
@@ -1592,27 +1592,27 @@ if test x$build_multiprocess != xno; then
 fi
 
 AC_MSG_CHECKING([whether to build adinkracoind])
-AM_CONDITIONAL([BUILD_BITCOIND], [test x$build_adinkracoind = xyes])
+AM_CONDITIONAL([BUILD_ADINKRACOIND], [test x$build_adinkracoind = xyes])
 AC_MSG_RESULT($build_adinkracoind)
 
 AC_MSG_CHECKING([whether to build adinkracoin-cli])
-AM_CONDITIONAL([BUILD_BITCOIN_CLI], [test x$build_adinkracoin_cli = xyes])
+AM_CONDITIONAL([BUILD_ADINKRACOIN_CLI], [test x$build_adinkracoin_cli = xyes])
 AC_MSG_RESULT($build_adinkracoin_cli)
 
 AC_MSG_CHECKING([whether to build adinkracoin-tx])
-AM_CONDITIONAL([BUILD_BITCOIN_TX], [test x$build_adinkracoin_tx = xyes])
+AM_CONDITIONAL([BUILD_ADINKRACOIN_TX], [test x$build_adinkracoin_tx = xyes])
 AC_MSG_RESULT($build_adinkracoin_tx)
 
 AC_MSG_CHECKING([whether to build adinkracoin-wallet])
-AM_CONDITIONAL([BUILD_BITCOIN_WALLET], [test x$build_adinkracoin_wallet = xyes])
+AM_CONDITIONAL([BUILD_ADINKRACOIN_WALLET], [test x$build_adinkracoin_wallet = xyes])
 AC_MSG_RESULT($build_adinkracoin_wallet)
 
 AC_MSG_CHECKING([whether to build adinkracoin-util])
-AM_CONDITIONAL([BUILD_BITCOIN_UTIL], [test x$build_adinkracoin_util = xyes])
+AM_CONDITIONAL([BUILD_ADINKRACOIN_UTIL], [test x$build_adinkracoin_util = xyes])
 AC_MSG_RESULT($build_adinkracoin_util)
 
 AC_MSG_CHECKING([whether to build libraries])
-AM_CONDITIONAL([BUILD_BITCOIN_LIBS], [test x$build_adinkracoin_libs = xyes])
+AM_CONDITIONAL([BUILD_ADINKRACOIN_LIBS], [test x$build_adinkracoin_libs = xyes])
 if test x$build_adinkracoin_libs = xyes; then
   AC_DEFINE(HAVE_CONSENSUS_LIB, 1, [Define this symbol if the consensus lib has been built])
   AC_CONFIG_FILES([libadinkracoinconsensus.pc:libadinkracoinconsensus.pc.in])
@@ -1821,14 +1821,14 @@ AC_SUBST(COPYRIGHT_YEAR, _COPYRIGHT_YEAR)
 AC_SUBST(COPYRIGHT_HOLDERS, "_COPYRIGHT_HOLDERS")
 AC_SUBST(COPYRIGHT_HOLDERS_SUBSTITUTION, "_COPYRIGHT_HOLDERS_SUBSTITUTION")
 AC_SUBST(COPYRIGHT_HOLDERS_FINAL, "_COPYRIGHT_HOLDERS_FINAL")
-AC_SUBST(BITCOIN_DAEMON_NAME)
-AC_SUBST(BITCOIN_GUI_NAME)
-AC_SUBST(BITCOIN_CLI_NAME)
-AC_SUBST(BITCOIN_TX_NAME)
-AC_SUBST(BITCOIN_UTIL_NAME)
-AC_SUBST(BITCOIN_WALLET_TOOL_NAME)
-AC_SUBST(BITCOIN_MP_NODE_NAME)
-AC_SUBST(BITCOIN_MP_GUI_NAME)
+AC_SUBST(ADINKRACOIN_DAEMON_NAME)
+AC_SUBST(ADINKRACOIN_GUI_NAME)
+AC_SUBST(ADINKRACOIN_CLI_NAME)
+AC_SUBST(ADINKRACOIN_TX_NAME)
+AC_SUBST(ADINKRACOIN_UTIL_NAME)
+AC_SUBST(ADINKRACOIN_WALLET_TOOL_NAME)
+AC_SUBST(ADINKRACOIN_MP_NODE_NAME)
+AC_SUBST(ADINKRACOIN_MP_GUI_NAME)
 
 AC_SUBST(RELDFLAGS)
 AC_SUBST(DEBUG_CPPFLAGS)

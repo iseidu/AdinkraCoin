@@ -1,0 +1,93 @@
+#!/sbin/openrc-run
+
+# backward compatibility for existing gentoo layout 
+#
+if [ -d "/var/lib/adinkracoin/.adinkracoin" ]; then
+	ADINKRACOIND_DEFAULT_DATADIR="/var/lib/adinkracoin/.adinkracoin"
+else
+	ADINKRACOIND_DEFAULT_DATADIR="/var/lib/adinkracoind"
+fi
+
+ADINKRACOIND_CONFIGFILE=${ADINKRACOIND_CONFIGFILE:-/etc/adinkracoin/adinkracoin.conf}
+ADINKRACOIND_PIDDIR=${ADINKRACOIND_PIDDIR:-/var/run/adinkracoind}
+ADINKRACOIND_PIDFILE=${ADINKRACOIND_PIDFILE:-${ADINKRACOIND_PIDDIR}/adinkracoind.pid}
+ADINKRACOIND_DATADIR=${ADINKRACOIND_DATADIR:-${ADINKRACOIND_DEFAULT_DATADIR}}
+ADINKRACOIND_USER=${ADINKRACOIND_USER:-${ADINKRACOIN_USER:-adinkracoin}}
+ADINKRACOIND_GROUP=${ADINKRACOIND_GROUP:-adinkracoin}
+ADINKRACOIND_BIN=${ADINKRACOIND_BIN:-/usr/bin/adinkracoind}
+ADINKRACOIND_NICE=${ADINKRACOIND_NICE:-${NICELEVEL:-0}}
+ADINKRACOIND_OPTS="${ADINKRACOIND_OPTS:-${ADINKRACOIN_OPTS}}"
+
+name="Adinkracoin Core Daemon"
+description="Adinkracoin cryptocurrency P2P network daemon"
+
+command="/usr/bin/adinkracoind"
+command_args="-pid=\"${ADINKRACOIND_PIDFILE}\" \
+		-conf=\"${ADINKRACOIND_CONFIGFILE}\" \
+		-datadir=\"${ADINKRACOIND_DATADIR}\" \
+		-daemon \
+		${ADINKRACOIND_OPTS}"
+
+required_files="${ADINKRACOIND_CONFIGFILE}"
+start_stop_daemon_args="-u ${ADINKRACOIND_USER} \
+			-N ${ADINKRACOIND_NICE} -w 2000"
+pidfile="${ADINKRACOIND_PIDFILE}"
+
+# The retry schedule to use when stopping the daemon. Could be either
+# a timeout in seconds or multiple signal/timeout pairs (like
+# "SIGKILL/180 SIGTERM/300")
+retry="${ADINKRACOIND_SIGTERM_TIMEOUT}"
+
+depend() {
+	need localmount net
+}
+
+# verify
+# 1) that the datadir exists and is writable (or create it)
+# 2) that a directory for the pid exists and is writable
+# 3) ownership and permissions on the config file
+start_pre() {
+	checkpath \
+	-d \
+	--mode 0750 \
+	--owner "${ADINKRACOIND_USER}:${ADINKRACOIND_GROUP}" \
+	"${ADINKRACOIND_DATADIR}"
+
+	checkpath \
+	-d \
+	--mode 0755 \
+	--owner "${ADINKRACOIND_USER}:${ADINKRACOIND_GROUP}" \
+	"${ADINKRACOIND_PIDDIR}"
+
+	checkpath -f \
+	-o "${ADINKRACOIND_USER}:${ADINKRACOIND_GROUP}" \
+	-m 0660 \
+	"${ADINKRACOIND_CONFIGFILE}"
+
+	checkconfig || return 1
+}
+
+checkconfig()
+{
+	if grep -qs '^rpcuser=' "${ADINKRACOIND_CONFIGFILE}" && \
+		! grep -qs '^rpcpassword=' "${ADINKRACOIND_CONFIGFILE}" ; then
+		eerror ""
+		eerror "ERROR: You must set a secure rpcpassword to run adinkracoind."
+		eerror "The setting must appear in ${ADINKRACOIND_CONFIGFILE}"
+		eerror ""
+		eerror "This password is security critical to securing wallets "
+		eerror "and must not be the same as the rpcuser setting."
+		eerror "You can generate a suitable random password using the following "
+		eerror "command from the shell:"
+		eerror ""
+		eerror "bash -c 'tr -dc a-zA-Z0-9 < /dev/urandom | head -c32 && echo'"
+		eerror ""
+		eerror "It is recommended that you also set alertnotify so you are "
+		eerror "notified of problems:"
+		eerror ""
+		eerror "ie: alertnotify=echo %%s | mail -s \"Adinkracoin Alert\"" \
+			"admin@foo.com"
+		eerror ""
+		return 1
+	fi
+}
